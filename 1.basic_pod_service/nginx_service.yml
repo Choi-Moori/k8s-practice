@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: mooo
+spec:
+# node를 통해 직접 접근 가능한 타입
+  type: NodePort
+  ports:
+  - port: 80 #service의 port를 의미한다.
+    targetPort: 80 #service가 라우팅해줄 대상(=pod)의 port를 의미. - pod 의 포트와 targetport 와 일치해야 한다.
+    nodePort: 30499 # 65535 의 포트중에서 겹치지 않는 아무 포트 : 잘알려진port(well known port)는 사용X
+    # pod의 labels.app과 service의 selector의 app 이 일치해야 함을 유의
+  selector:
+    app: my-nginx
