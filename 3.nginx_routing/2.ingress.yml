@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  # namespace 없는걸로 진행
+spec:
+  replicas: 2
+  selector:
+    matchLabels: 
+        app: my-nginx
+  template:
+    metadata:
+      labels:
+        app: my-nginx
+    spec: 
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+          - containerPort: 80
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  # namespace 지움
+spec:
+# Ingress를 적용하기 위해 ClusterIp로 변경 : LoadBalancer -> ClusterIp 로 변경.
+  type: ClusterIP
+  ports: 
+  - name: http
+    port: 80 # 그냥 port 는 서비스의 포트
+    targetPort: 80 # pod 의 containerPort 입력
+    # NodePort가 필요하지 않음.
+  selector:
+    app: my-nginx
+
+--- 
+# ingress 자원에 대한 정의
+# ingress-controller 설치는 별도로 필요하고,
+# ingress-controller도 nginx 기반으로 구성되어 있다.
+# ingress-controller를 설치시에 alb가 생성되고, Ingress 자원과 함께 서비스 라우팅을 수행한다.
+# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/aws/deploy.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata: 
+  name: my-nginx-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1 #첫번째 Prefix 제거 후 endpoint 전달
+    # 밑에서 /$1 = /product-service/ , /order-service/ 이다.
+    # 이렇게 하는 것이 일반적이다. -> backend 에서는 /product-service/product/list 가 아닌
+    # /product/list 이런식으로 mapping 되어 있을 태니까 앞에 붙이는건 어떤 service 인지 구분하기 위해 
+    # 붙여놓았기 때문에 제거해서 보내준다. (msa를 위해 무슨 서비스로 보내는지 인지하기 위해서)
+spec:
+  rules:
+  # 내 host를 넣어둬
+  - host: server.moori98.shop
+    http:
+      paths: 
+      - path: /product-service/(.*)
+        pathType: Prefix
+        backend:
+          service:
+          # 우리 위에 쓴 서비스 명
+            name: nginx-service
+            port: 
+              number: 80
+      - path: /order-service/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port: 
+              number: 80
