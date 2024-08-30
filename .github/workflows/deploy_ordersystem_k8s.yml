@@ -41,6 +41,6 @@ jobs:
         # 줄바꿈을 할 때에는 \ 를 써야 한다.
         # 앞에는 도커 파일 위치, 뒤에는 build context 위치
         run: |
-          docker build -t $REGISTRY/REPOSITORY:latest \
+          docker build -t $REGISTRY/$REPOSITORY:latest \
           -f ./ordersystem/Dockerfile ./ordersystem
           docker push $REGISTRY/REPOSITORY:latest
