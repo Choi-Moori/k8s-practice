@@ -37,7 +37,7 @@ jobs:
       - name: build and push docker images to ecr
         env: 
           REPOSITORY: moori-ordersystem
-          REGISTRY: 346903264902.dkr.ecr.ap-northeast-2.amazonaws.com/moori-ordersystem
+          REGISTRY: 346903264902.dkr.ecr.ap-northeast-2.amazonaws.com
         # 줄바꿈을 할 때에는 \ 를 써야 한다.
         # 앞에는 도커 파일 위치, 뒤에는 build context 위치
         run: |
