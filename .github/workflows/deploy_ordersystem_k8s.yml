@@ -1,0 +1,32 @@
+# docker 빌드 후 erc 업로드 및 kubectl apply
+name: deploy ordersystem with k8s
+on:
+  push:
+    branches:
+      - main
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout github
+        uses: actions/checkout@v2
+# 가상 pc 에 kubectl 을 설치해 주어야 한다.
+      - name: install kubectl 
+        uses: azure/setup-kubectl@v3
+        with:
+        # 너무 최신 버전을 쓰면 못 따라 올 수 있다. 우리는 1.29.몇 쓰고 있음
+          version: "v1.25.9"
+        id: install
+      
+      - name: configure aws
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_KEY}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET}}
+          aws-region: ap-northeast-2
+
+      - name: update cluster information
+      # 우리 팀 cluster 이름
+        run: aws eks update-kubeconfig --name 4team-cluster --region ap-northeast-2
+        
