@@ -29,4 +29,18 @@ jobs:
       - name: update cluster information
       # 우리 팀 cluster 이름
         run: aws eks update-kubeconfig --name 4team-cluster --region ap-northeast-2
-        
+
+      - name: login ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: build and push docker images to ecr
+        env: 
+          REPOSITORY: moori-ordersystem
+          REGISTRY: 346903264902.dkr.ecr.ap-northeast-2.amazonaws.com/moori-ordersystem
+        # 줄바꿈을 할 때에는 \ 를 써야 한다.
+        # 앞에는 도커 파일 위치, 뒤에는 build context 위치
+        run: |
+          docker build -t $REGISTRY/REPOSITORY:latest \
+          -f ./ordersystem/Dockerfile ./ordersystem
+          docker push $REGISTRY/REPOSITORY:latest
