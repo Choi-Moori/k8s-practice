@@ -44,3 +44,11 @@ jobs:
           docker build -t $REGISTRY/$REPOSITORY:latest \
           -f ./ordersystem/Dockerfile ./ordersystem
           docker push $REGISTRY/$REPOSITORY:latest
+      
+      # 문제점 : image 가 변경 되었을 때 재시작 해줘야 한다. 코드가 수정 되었을 때 image 가 변경됨.
+      # 해결하기 위해 rollout 을 적어줘야 함. -> 이를 해도 헬스체크가 되지 않음
+      # restart를 하려면 deployment 의 name 을 적어줘야 함. 
+      - name: eks kubectl apply
+        run: |
+          kubectl apply -f ./ordersystem/k8s/ordersystem_depl.yml
+          kubectl rollout restart deployment ordersystem-deployment -n mooo
