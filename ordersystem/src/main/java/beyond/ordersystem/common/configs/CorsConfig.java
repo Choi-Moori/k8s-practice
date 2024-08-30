@@ -10,7 +10,7 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry){
         corsRegistry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")    // vue 허용 url 명시
+                .allowedOrigins("https://www.moori98.shop")    // vue 허용 url 명시
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);
