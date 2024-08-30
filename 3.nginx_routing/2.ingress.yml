@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
+  namespace: mooo
   # namespace 없는걸로 진행
 spec:
   replicas: 2
@@ -23,6 +24,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nginx-service
+  namespace: mooo
   # namespace 지움
 spec:
 # Ingress를 적용하기 위해 ClusterIp로 변경 : LoadBalancer -> ClusterIp 로 변경.
@@ -40,12 +42,14 @@ spec:
 # ingress-controller 설치는 별도로 필요하고,
 # ingress-controller도 nginx 기반으로 구성되어 있다.
 # ingress-controller를 설치시에 alb가 생성되고, Ingress 자원과 함께 서비스 라우팅을 수행한다.
+# ingress controller는 1개에서 여러개의 ingress로 라우팅 한다. 
 # kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/aws/deploy.yaml
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata: 
   name: my-nginx-ingress
+  namespace: mooo
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/rewrite-target: /$1 #첫번째 Prefix 제거 후 endpoint 전달

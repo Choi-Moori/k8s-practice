@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod1
+  namespace: mooo
+  labels:
+    app: my-nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+      - containerPort: 80
+
+# yml 의 특성 --- 를 기준으로 다른 스크립트로 규정 (두 파일인거처럼 3파일인거처럼 만들 수 있다.)
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod2
+  namespace: mooo
+  labels:
+    app: my-nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+      - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: mooo
+spec:
+  type: NodePort
+  ports: 
+  - port: 80 # 그냥 port 는 서비스의 포트
+    targetPort: 80 # pod 의 containerPort 입력
+    nodePort: 30499
+    # nodeport 는 생략하구 내부에서만 동작되게 하자
+  # my-nginx 라는 labels-app 의 이름을 갖고 있는 pod 들을 연동하겠다.
+  selector:
+    app: my-nginx

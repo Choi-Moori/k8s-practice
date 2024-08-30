@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: mooo
+spec:
+  replicas: 2
+  selector:
+    matchLabels: 
+        app: my-nginx
+  template:
+    metadata:
+      labels:
+        app: my-nginx
+    spec: 
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+          - containerPort: 80
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: mooo
+spec:
+# 대소문자 주의
+  type: ClusterIP
+  ports: 
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: my-nginx
+      
+# 쿠버네티스에서 https 인증서 적용 절차
+# 1. cert-manager 생성
+  # 1.1. cert-manager 생성을 위한 cert-manager namespace 생성 : kubectl create namespace cert-manager
+# 1.2. 부터는 로컬에서 하는 작업이다.
+  # 1.2. helm 패키지 매니저 설치 : 구글 검색 후 다운로드 후 로컬에 설치
+  # 1.3. helm repository 추가 : helm repo add jetstack https://charts.jetstack.io
+  # 1.4. helm repository update : helm repo update
+  # 1.5. helmn을 통해 cert-manager 설치 : helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.5.0 --set installCRDs=true
+# (위에 생성한 namespace)
+
+# 2. ClusterIssuer 생성
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+# 인증서의 종류이다.(밑에 사용한 인증서는 많이 쓰이는 인증서이다)
+  name: letsencrypt-prod
+  namespace: mooo
+spec:
+  acme:
+  # 인증서 서버 주소. 해당 서버의 리소스를 통해 인증서 발행
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # 아무 이메일이나 넣어두 된다. (실무에서는 아무거나 넣으면 안됨!!)
+    # 인증서 만료나 이런 메일이 이 메일로 전송된다.
+    email: anflwkd@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+
+# 3. Certificate 생성
+---
+apiVersion: cert-manager.io/v1
+# 이것은 쿠버네티스의 자원이다
+kind: Certificate
+metadata:
+# 우리 이름으로 해보자! (마음대로 지어도 됨)
+  name: moori-com-tls
+  namespace: mooo
+spec:
+  secretName: moori-com-tls
+  # 기간 : 어느 정도 기간으로 할 것인가.
+  duration: 2160h #90일(우리 끝나기 까지 3달 정도 남아서)
+  renewBefore: 360h # 15일 전에 갱신
+  issuerRef:
+    name: letsencrypt-prod
+    # ClusterIssuer 를 보고 만들것이다. (참조할 것이다)
+    kind: ClusterIssuer
+  # 우리 도메인 명을 써주면 된다.
+  commonName: server.moori98.shop
+  dnsNames:
+  - server.moori98.shop
+
+# 위에 있던 Ingress 를 내려줌
+# 왜? 순서가 중요할 수도 있다고 말해주셨음
+--- 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata: 
+  name: my-nginx-ingress
+  namespace: mooo
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - "server.moori98.shop"
+    # certeficate 에 지정해 놓은 secretName 을 넣어주면 된다.
+    secretName: moori-com-tls
+  rules:
+  - host: server.moori98.shop
+    http:
+      paths: 
+      - path: /product-service/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port: 
+              number: 80
+      - path: /order-service/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port: 
+              number: 80

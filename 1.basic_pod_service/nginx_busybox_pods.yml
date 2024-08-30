@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-busybox-pod
+  # 내 namespace 써주기
+  namespace: mooo
+  # 나중에 service랑 매핑될 이름
+  labels:
+    app: nginx-busybox-pod
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+      - containerPort: 80
+    - name: busybox
+      image: busybox
+      # do wget == curl 과 비슷한 것이래 -> 같은 pod내 에 존재하기 때문에 localhost 를 통해 호출할 수 있다.
+      # service 로 가는 거보다 더 멀리 안나가기 때문에 좀 더 빠를듯 -> 80 은 위에 있는 containerPort
+      command: ['sh', '-c', 'while true; do wget -qO- http://localhost:80; sleep 5; done']

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  # 내 namespace 이름
+  namespace: mooo
+spec:
+# pod 를 2개를 유지하겠다.
+  replicas: 1
+  # replicaset 나 deployment 는 pod 와 문법이 약간 다름
+  # 아래 요소는 replicaset이 관리할 pod 를 선택하기 위한 이름이다.
+  # 아래의 template.metadata.labels의 이름과 selector.matchLabels.app의 이름이 일치해야 한다.
+  selector:
+    matchLabels: 
+        app: my-nginx
+  template:
+  # 아래의 labels.app 부분은 service 의 selector 부분과 일치해야 하고,
+  # 위의 matchLabels와도 일치해야함.
+    metadata:
+      labels:
+        app: my-nginx
+    spec: 
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+          - containerPort: 80
+--- 
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: mooo
+spec:
+  type: NodePort
+  ports: 
+  - port: 80 # 그냥 port 는 서비스의 포트
+    targetPort: 80 # pod 의 containerPort 입력
+    nodePort: 30499
+    # nodeport 는 생략하구 내부에서만 동작되게 하자
+  # my-nginx 라는 labels-app 의 이름을 갖고 있는 pod 들을 연동하겠다.
+  selector:
+    app: my-nginx
