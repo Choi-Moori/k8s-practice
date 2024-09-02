@@ -1,0 +1,28 @@
+# 메트릭 서버(파드의 자원상황 모니터링 툴) 설치 -> 이것 도 클러스터당 한개
+# kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+# Horizontal Pod Autoscaler
+# 컨테이너 자동 확장.
+# 5분이 지나고 나서 부하가 없을 시에 자동으로 최소 POD대수로 돌아옴.
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ordersystem-hpa
+  namespace: mooo
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ordersystem-deployment
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50
+
+# 부하 테스트 linux 스크립트 -> exec 로 pod 안에 들어가서 돌려야 함.(안그러면 안돌아가)
+# kubectl exec -it 파드명 /bin/bash -n 네임스페이스
+# while true; do curl -s http://ordersystem-service/product/list; done
+
+
+# 부하 모니터링
+# -w : watch옵션으로 실시간으로 조회 하라는 의미
+# kubectl get hpa ordersystem-hpa -m mooo -w 
