@@ -79,3 +79,19 @@ spec:
                 key: AWS_SECRET_KEY
                 # 이름은 아까 만든 secrets 의 이름을 넣는다.
                 name: moori-app-secrets
+
+          # 무중단 배포를 위한 컨테이너 health check
+          readinessProbe:
+            httpGet:
+              path: /product/list
+              port: 8080
+            # 컨테이너 시작 후 지연시간 설정
+            initialDelaySeconds: 10
+            # 확인 반복 주기
+            periodSeconds: 10
+            # 요청 타임아웃 설정
+            timeoutSeconds: 1
+            # 성공 인식 횟수 설정
+            successThreshold: 1
+            # 연속 실패 횟수 : 연속적으로 3번을 실패하면 건강하지 않은 상태로 판단하여 기존서버 종료시키지 않음
+            failureThreshold: 5
