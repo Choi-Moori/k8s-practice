@@ -29,7 +29,7 @@ jobs:
 
       - name: update cluster information
       # 우리 팀 cluster 이름
-        run: aws eks update-kubeconfig --name 4team-cluster --region ap-northeast-2
+        run: aws eks update-kubeconfig --name 4team-flint --region ap-northeast-2
 
       - name: login ECR
         id: login-ecr
