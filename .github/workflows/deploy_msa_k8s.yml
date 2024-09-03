@@ -33,6 +33,12 @@ jobs:
       - name: login ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: delete dep;
+        run: |
+          kubectl delete -f ./msa/member/k8s/member_depl.yml
+          kubectl delete -f ./msa/ordering/k8s/order_depl.yml
+          kubectl delete -f ./msa/product/k8s/product_depl.yml
 #------------------------- member -----------------------------------
       - name: build and push docker member images to ecr
         env: 
@@ -45,7 +51,6 @@ jobs:
       
       - name: eks kubectl apply
         run: |
-          kubectl delete -f ./msa/member/k8s/member_depl.yml
           kubectl apply -f ./msa/member/k8s/member_depl.yml
           kubectl rollout restart deployment member-deployment -n mooo
 #------------------------- order -----------------------------------
@@ -60,7 +65,6 @@ jobs:
       
       - name: eks kubectl apply
         run: |
-          kubectl delete -f ./msa/ordering/k8s/order_depl.yml
           kubectl apply -f ./msa/ordering/k8s/order_depl.yml
           kubectl rollout restart deployment order-deployment -n mooo
 
@@ -77,7 +81,6 @@ jobs:
 
       - name: eks kubectl apply
         run: |
-          kubectl delete -f ./msa/product/k8s/product_depl.yml
           kubectl apply -f ./msa/product/k8s/product_depl.yml
           kubectl rollout restart deployment product-deployment -n mooo
 #----------------------------------------------------------------------------------
