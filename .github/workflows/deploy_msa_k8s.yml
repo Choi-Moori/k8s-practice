@@ -45,7 +45,7 @@ jobs:
       
       - name: eks kubectl apply
         run: |
-          kubectl apply -f ./msa/member/member_depl.yml
+          kubectl apply -f ./msa/member/k8s/member_depl.yml
           kubectl rollout restart deployment member-deployment -n mooo
 #------------------------- order -----------------------------------
       - name: build and push docker order images to ecr
@@ -59,7 +59,7 @@ jobs:
       
       - name: eks kubectl apply
         run: |
-          kubectl apply -f ./msa/order/order_depl.yml
+          kubectl apply -f ./msa/order/k8s/order_depl.yml
           kubectl rollout restart deployment order-deployment -n mooo
 
 #------------------------- product -----------------------------------
@@ -75,6 +75,6 @@ jobs:
 
       - name: eks kubectl apply
         run: |
-          kubectl apply -f ./msa/order/product_depl.yml
+          kubectl apply -f ./msa/order/k8s/product_depl.yml
           kubectl rollout restart deployment product-deployment -n mooo
 #----------------------------------------------------------------------------------
