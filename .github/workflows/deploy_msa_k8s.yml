@@ -54,12 +54,12 @@ jobs:
           REGISTRY: 346903264902.dkr.ecr.ap-northeast-2.amazonaws.com
         run: |
           docker build -t $REGISTRY/$REPOSITORY:latest \
-          -f ./msa/order/Dockerfile ./msa/order
+          -f ./msa/ordering/Dockerfile ./msa/ordering
           docker push $REGISTRY/$REPOSITORY:latest
       
       - name: eks kubectl apply
         run: |
-          kubectl apply -f ./msa/order/k8s/order_depl.yml
+          kubectl apply -f ./msa/ordering/k8s/order_depl.yml
           kubectl rollout restart deployment order-deployment -n mooo
 
 #------------------------- product -----------------------------------
