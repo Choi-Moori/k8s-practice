@@ -75,6 +75,6 @@ jobs:
 
       - name: eks kubectl apply
         run: |
-          kubectl apply -f ./msa/order/k8s/product_depl.yml
+          kubectl apply -f ./msa/product/k8s/product_depl.yml
           kubectl rollout restart deployment product-deployment -n mooo
 #----------------------------------------------------------------------------------
