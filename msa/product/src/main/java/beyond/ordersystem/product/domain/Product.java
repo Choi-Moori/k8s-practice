@@ -3,10 +3,9 @@ package beyond.ordersystem.product.domain;
 import beyond.ordersystem.common.domain.BaseTimeEntity;
 import beyond.ordersystem.product.dto.ProductResDto;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
-import java.util.List;
+
 
 @Entity
 @NoArgsConstructor

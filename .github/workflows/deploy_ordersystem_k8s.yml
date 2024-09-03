@@ -3,7 +3,7 @@ name: deploy ordersystem with k8s
 on:
   push:
     branches:
-      - main
+      - dev
       
       
 jobs:

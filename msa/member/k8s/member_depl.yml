@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: member-deployment
+  namespace: mooo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: 
+        app: member
+  template:
+    metadata:
+      labels:
+        app: member
+    spec: 
+      containers:
+        - name: member
+        # 정확한 이미지 명을 넣어주어야 한다.
+        # aws의 ecr(image repository 라고 한다) 주소 사용 -> 생성 후 복사 하고 뒤에 :latest 붙여줌
+          image: 346903264902.dkr.ecr.ap-northeast-2.amazonaws.com/moori-member:latest
+          ports:
+          # 기존에 80 -> 우린 이제 8080 포트를 사용할 것이므로 8080으로 변경
+          - containerPort: 8080
+          resources:
+          # 최대 할당 가능량
+            limits:
+              cpu: "1"
+              memory: "500Mi"
+          # 최소 할당량
+            requests: 
+              cpu: "0.5"
+              memory: "250Mi"
+          env:
+          - name: REDIS_HOST
+            valueFrom:
+              secretKeyRef:
+                key: REDIS_HOST
+                # 이름은 아까 만든 secrets 의 이름을 넣는다.
+                name: moori-app-secrets
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                key: DB_HOST
+                # 이름은 아까 만든 secrets 의 이름을 넣는다.
+                name: moori-app-secrets
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                # 이름은 아까 만든 secrets 의 이름을 넣는다.
+                name: moori-app-secrets
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: DB_USERNAME
+                # 이름은 아까 만든 secrets 의 이름을 넣는다.
+                name: moori-app-secrets
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: JWT_SECRET
+                # 이름은 아까 만든 secrets 의 이름을 넣는다.
+                name: moori-app-secrets
+          - name: JWT_SECRET_RT
+            valueFrom:
+              secretKeyRef:
+                key: JWT_SECRET_RT
+                # 이름은 아까 만든 secrets 의 이름을 넣는다.
+                name: moori-app-secrets
+          - name: AWS_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                key: AWS_ACCESS_KEY
+                # 이름은 아까 만든 secrets 의 이름을 넣는다.
+                name: moori-app-secrets
+          - name: AWS_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                key: AWS_SECRET_KEY
+                # 이름은 아까 만든 secrets 의 이름을 넣는다.
+                name: moori-app-secrets

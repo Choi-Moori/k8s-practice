@@ -49,25 +49,6 @@ public class OrderingService {
 //        this.kafkaTemplate = kafkaTemplate;
     }
 
-//    public Long orderCreate(OrderCreateDto dto){
-//        Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(()->new EntityNotFoundException("해당 멤버 ID가 존재하지 않습니다."));
-//        Ordering ordering = Ordering.builder()
-//                .member(member)
-//                .build();
-//
-//        List<OrderDetail> orderDetailList = new ArrayList<>();
-//        for(OrderCreateDto.OrderInfoDto dtos : dto.getOrderInfoDto()){
-//            Product product = productRepository.findById(dtos.getProductId()).orElseThrow(()->new EntityNotFoundException("해당 상품 ID가 존재하지 않습니다."));
-//            OrderDetail orderDetail = OrderDetail.builder()
-//                    .product(product)
-//                    .quantity(dtos.getProductCount())
-//                    .ordering(ordering)
-//                    .build();
-//            ordering.getOrderDetails().add(orderDetail);
-//        }
-//        orderingRepository.save(ordering);
-//        return ordering.getId();
-//    }
 
 //    1. 조회 : resttemplate(동기), 변경 : resttemplate(동기)
 //    2. 조회 : feignclient(동기),  변경 : feignclient(동기)
@@ -191,61 +172,6 @@ public class OrderingService {
         sseController.publishMessage(savedOrdering.toEntity(), "admin@test.com");
         return savedOrdering;
     }
-
-//    조회는 Kafka를 사용할 수 없다.
-//    product 조회는 기다려야 한다.
-//    product 재고 감소는 감소가 되는지 기다릴필요 없이, order생성 가능.
-//    kafka는 product의 order 양쪽에 세팅 해줘야함
-//     kafka : 메시지 저장소 (rabbitmq랑 똑같다) => q대신 topic을 사용
-//    kafka 메시지 저장소에 json 형태로 order에서 받은 메시지 저장 > 그걸 product가 수신해감
-//    - 그래서 order (집어넣는쪽 producer), product(받는쪽 consumer)로 양쪽에 모두 작성해야 함
-//    장점) kafka에 넣어주면 한쪽 서버가 꺼져있어도 kafka가 가지고 있다가 전해주기 때문에 -> 유실 가능성 감소
-//    public Ordering orderFeignKafkaCreate(List<OrderSaveReqDto> dtos){
-//        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Ordering ordering = Ordering.builder()
-//                .memberEmail(memberEmail)
-//                .build();
-//
-//        for(OrderSaveReqDto dto : dtos){
-//            int quantity = dto.getProductCnt();
-//
-//            if(quantity < 1){
-//                throw new IllegalArgumentException("구매 수량은 1개 이상만 가능합니다");
-//            }
-//
-//            CommonResDto commonResDto = productFeign.getProductById(dto.getProductId());
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            ProductDto productDto = objectMapper.convertValue(commonResDto.getResult(), ProductDto.class);
-//
-//
-//            if (productDto.getName().contains("sale")) {
-//                int newQuantity = stockInventoryService.decreaseStock(dto.getProductId(), dto.getProductCnt()).intValue();
-//
-//                if (newQuantity < 0) {
-//                    throw new IllegalArgumentException("재고 부족");
-//                }
-//                stockDecreaseEventHandler.publish(new StockDecreaseEvent(productDto.getId(), dto.getProductCnt()));
-//
-//            } else {
-//                if (productDto.getStockQuantity() < quantity) {
-//                    throw new IllegalArgumentException("재고 부족");
-//                }
-//                ProductUpdateStockDto productUpdateStockDto = new ProductUpdateStockDto(dto.getProductId(), dto.getProductCnt());
-//                kafkaTemplate.send("product-update-topic", productUpdateStockDto);
-//            }
-//            OrderDetail orderDetail =  OrderDetail.builder()
-//                    .productId(productDto.getId())
-//                    .quantity(quantity)
-//                    .ordering(ordering)
-//                    .build();
-//            ordering.getOrderDetails().add(orderDetail);
-//        }
-//
-//        Ordering savedOrdering = orderingRepository.save(ordering);
-//
-//        sseController.publishMessage(savedOrdering.toEntity(), "admin@test.com");
-//        return savedOrdering;
-//    }
 
     public List<OrderListResDto> orderList(){
         List<Ordering> orderings = orderingRepository.findAll();

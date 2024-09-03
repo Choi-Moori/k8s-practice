@@ -8,7 +8,6 @@ import beyond.ordersystem.product.dto.ProductSearchDto;
 import beyond.ordersystem.product.dto.ProductUpdateStockDto;
 import beyond.ordersystem.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

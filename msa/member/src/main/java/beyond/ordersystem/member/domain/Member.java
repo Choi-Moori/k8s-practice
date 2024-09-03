@@ -2,12 +2,10 @@ package beyond.ordersystem.member.domain;
 
 import beyond.ordersystem.common.domain.Address;
 import beyond.ordersystem.common.domain.BaseTimeEntity;
-import beyond.ordersystem.member.dto.MemberPasswordResetDto;
 import beyond.ordersystem.member.dto.MemberResDto;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor

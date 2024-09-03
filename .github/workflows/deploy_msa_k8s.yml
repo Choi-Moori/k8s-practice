@@ -1,0 +1,80 @@
+# docker 빌드 후 erc 업로드 및 kubectl apply
+name: deploy ordersystem with k8s
+on:
+  push:
+    branches:
+      - main
+      
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout github
+        uses: actions/checkout@v2
+# 가상 pc 에 kubectl 을 설치해 주어야 한다.
+      - name: install kubectl 
+        uses: azure/setup-kubectl@v3
+        with:
+        # 너무 최신 버전을 쓰면 못 따라 올 수 있다. 우리는 1.29.몇 쓰고 있음
+          version: "v1.25.9"
+        id: install
+      
+      - name: configure aws
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_KEY}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET}}
+          aws-region: ap-northeast-2
+
+      - name: update cluster information
+        run: aws eks update-kubeconfig --name 4team-flint --region ap-northeast-2
+
+      - name: login ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+#------------------------- member -----------------------------------
+      - name: build and push docker member images to ecr
+        env: 
+          REPOSITORY: moori-member
+          REGISTRY: 346903264902.dkr.ecr.ap-northeast-2.amazonaws.com
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:latest \
+          -f ./msa/member/Dockerfile ./msa/member
+          docker push $REGISTRY/$REPOSITORY:latest
+      
+      - name: eks kubectl apply
+        run: |
+          kubectl apply -f ./msa/member/member_depl.yml
+          kubectl rollout restart deployment member-deployment -n mooo
+#------------------------- order -----------------------------------
+      - name: build and push docker order images to ecr
+        env: 
+          REPOSITORY: moori-order
+          REGISTRY: 346903264902.dkr.ecr.ap-northeast-2.amazonaws.com
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:latest \
+          -f ./msa/order/Dockerfile ./msa/order
+          docker push $REGISTRY/$REPOSITORY:latest
+      
+      - name: eks kubectl apply
+        run: |
+          kubectl apply -f ./msa/order/order_depl.yml
+          kubectl rollout restart deployment order-deployment -n mooo
+
+#------------------------- product -----------------------------------
+      - name: build and push docker product images to ecr
+        env: 
+          REPOSITORY: moori-product
+          REGISTRY: 346903264902.dkr.ecr.ap-northeast-2.amazonaws.com
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:latest \
+          -f ./msa/product/Dockerfile ./msa/product
+          docker push $REGISTRY/$REPOSITORY:latest
+      
+
+      - name: eks kubectl apply
+        run: |
+          kubectl apply -f ./msa/order/product_depl.yml
+          kubectl rollout restart deployment product-deployment -n mooo
+#----------------------------------------------------------------------------------

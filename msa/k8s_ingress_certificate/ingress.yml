@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata: 
+  name: ordersystem-ingress
+  namespace: mooo
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - "server.moori98.shop"
+    # certeficate 에 지정해 놓은 secretName 을 넣어주면 된다.
+    secretName: moori-com-tls
+  rules:
+  - host: server.moori98.shop
+    http:
+      paths: 
+      - path: /member-service/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: member-service
+            # 바꿀 필요가 없다.
+            # ingress에서 port가 8080이 아니라 80인 이유는 ingress에서 service는 80이고 service에서 8080으로 연결해주는 거라서
+            port: 
+              number: 80
+      - path: /order-service/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: order-service
+            # 바꿀 필요가 없다.
+            # ingress에서 port가 8080이 아니라 80인 이유는 ingress에서 service는 80이고 service에서 8080으로 연결해주는 거라서
+            port: 
+              number: 80
+      - path: /product-service/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: product-service
+            # 바꿀 필요가 없다.
+            # ingress에서 port가 8080이 아니라 80인 이유는 ingress에서 service는 80이고 service에서 8080으로 연결해주는 거라서
+            port: 
+              number: 80
