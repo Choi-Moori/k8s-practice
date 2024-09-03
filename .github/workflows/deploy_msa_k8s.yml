@@ -45,6 +45,7 @@ jobs:
       
       - name: eks kubectl apply
         run: |
+          kubectl delete -f ./msa/member/k8s/member_depl.yml
           kubectl apply -f ./msa/member/k8s/member_depl.yml
           kubectl rollout restart deployment member-deployment -n mooo
 #------------------------- order -----------------------------------
@@ -59,6 +60,7 @@ jobs:
       
       - name: eks kubectl apply
         run: |
+          kubectl delete -f ./msa/ordering/k8s/order_depl.yml
           kubectl apply -f ./msa/ordering/k8s/order_depl.yml
           kubectl rollout restart deployment order-deployment -n mooo
 
@@ -75,6 +77,7 @@ jobs:
 
       - name: eks kubectl apply
         run: |
+          kubectl delete -f ./msa/product/k8s/product_depl.yml
           kubectl apply -f ./msa/product/k8s/product_depl.yml
           kubectl rollout restart deployment product-deployment -n mooo
 #----------------------------------------------------------------------------------
